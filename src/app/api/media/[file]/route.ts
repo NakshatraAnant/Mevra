@@ -1,0 +1,3 @@
+import { NextResponse } from 'next/server'; import fs from 'node:fs/promises'; import path from 'node:path';
+const T: Record<string, string> = { webp: 'image/webp', jpg: 'image/jpeg', png: 'image/png', glb: 'model/gltf-binary' };
+export async function GET(_: Request, { params }: { params: Promise<{ file: string }> }) { const { file } = await params; const m = file.match(/^[0-9a-f-]{36}\.(webp|jpg|png|glb)$/); if (!m) return new NextResponse('Not found', { status: 404 }); try { const b = await fs.readFile(path.join(process.cwd(), 'uploads', file)); return new NextResponse(new Uint8Array(b), { headers: { 'content-type': T[m[1]], 'cache-control': 'public, max-age=31536000, immutable' } }); } catch { return new NextResponse('Not found', { status: 404 }); } }

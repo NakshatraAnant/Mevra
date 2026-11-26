@@ -1,0 +1,3 @@
+'use client';
+import { useTransition } from 'react'; import { addRecipeToCart } from '@/actions/engage'; import { fetchCart } from '@/actions/cart'; import { useCart } from './cart';
+export function AddIngredients({ slugs }: { slugs: string[] }) { const [w, start] = useTransition(); const { put } = useCart(); if (!slugs.length) return <p className="text-grey">None of these ingredients can be bought right now.</p>; return <button className="btn btn-p" disabled={w} onClick={() => start(async () => { const r = await addRecipeToCart(slugs); const c = await fetchCart(); put({ ...c, message: r.message, error: r.added ? undefined : r.message }); })}>{w ? 'Adding' : 'Add ingredients to cart'}</button>; }

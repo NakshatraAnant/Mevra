@@ -1,0 +1,9 @@
+import * as THREE from 'three'; import { bowl, ground, pileSlots, seed, Stage, V, wallR, type Handle, type Hooks, type Slot } from '../kit'; import { ITEM } from '../items';
+export type MixP = { items: { model: string; g: number }[]; max: number };
+/** Bowl filled in the same proportions as the mix being priced. */
+export async function mount(canvas: HTMLCanvasElement, hooks: Hooks, first: MixP): Promise<Handle> {
+  const st = new Stage(canvas, hooks, { shadow: 13 }); ground(st, .28); const root = new THREE.Group(); st.scene.add(root); bowl(st, root); let it: ReturnType<Stage['items']> | null = null, slots: Slot[] = [], drop = 0, sig = '';
+  const build = async (p: MixP) => { const s = JSON.stringify(p); if (s === sig) return; sig = s; const tot = p.items.reduce((a, i) => a + i.g, 0); it?.dispose(); slots = []; if (tot > 0) { await st.need(p.items.map(i => i.model)); seed(31); slots = await pileSlots(Object.fromEntries(p.items.map(i => [i.model, i.g])), Math.max(10, Math.round(125 * Math.min(1, .25 + tot / p.max)))); const low = Math.min(...slots.map(x => x.pos.y)), lift = low - 1.9; for (const x of slots) { x.pos.y -= lift; const h = Math.hypot(x.pos.x, x.pos.z), lim = wallR(x.pos.y) - .75 * ITEM[x.k].size * (x.s ?? 1); if (x.pos.y < 3.6 && h > lim) { x.pos.x *= lim / h; x.pos.z *= lim / h; } } } it = st.items(slots, root); drop = hooks.reduced ? 0 : 1; st.invalidate(); }; await build(first);
+  const p = V(); let r = 0; st.frame = (_t, dt) => { if (!hooks.reduced) r += dt * .12; root.rotation.y = r; if (drop > 0) { drop = Math.max(0, drop - dt * 1.6); slots.forEach((s, i) => { p.copy(s.pos); p.y += drop * drop * (3 + (i % 9) * .8); it?.set(i, p, s.quat, s.s); }); } const d = 27 / Math.max(.7, Math.min(1.15, st.camera.aspect)); st.camera.position.set(0, d * .6, d); st.camera.lookAt(0, 3.2, 0); };
+  st.ready(); return { update: ((n: MixP) => { build(n); }) as never, dispose: () => st.dispose() };
+}

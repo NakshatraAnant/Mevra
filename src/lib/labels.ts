@@ -1,0 +1,4 @@
+export const STATUS: Record<string, string> = { launch: 'Available', seasonal: 'Seasonal', gift_only: 'Gift boxes only', prelaunch: 'Coming soon', draft: 'Draft', out_of_stock: 'Out of stock', discontinued: 'Discontinued' };
+export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+export const season = (m: number[]) => { if (!m.length) return ''; const s = [...m].sort((a, b) => a - b); let start = s[0]; for (const x of s) if (!s.includes(x === 1 ? 12 : x - 1)) start = x; let end = start; for (let i = 0; i < s.length; i++) { const n = end === 12 ? 1 : end + 1; if (s.includes(n) && n !== start) end = n; } return `${MONTHS[start - 1]} to ${MONTHS[end - 1]}`; };
+export const SNACK: Record<string, string> = { 'sk-roasted': '#8a5d10', 'sk-flavoured': '#9c431f', 'sk-makhana': '#59642a', 'sk-mixes': '#2c5a4a', 'sk-dates': '#6a2f20', 'sk-bars': '#8a5a24' };

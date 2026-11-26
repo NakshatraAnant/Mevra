@@ -1,0 +1,26 @@
+import Link from 'next/link';
+import type { Settings } from '@/lib/settings';
+/** Wordmark: the almond-drop above the V is the brand device. Swappable from admin → Settings → Brand (logo_path). */
+export function Wordmark({ name = 'MEVRA', logo, className = '' }: { name?: string; logo?: string; className?: string }) {
+  if (logo) return <img src={logo} alt={name} className={`h-8 w-auto ${className}`} />; // eslint-disable-line @next/next/no-img-element
+  if (name !== 'MEVRA') return <span className={`serif text-2xl tracking-[.12em] ${className}`}>{name}</span>;
+  return <svg viewBox="0 0 218 44" role="img" aria-label="MEVRA" className={className} fill="none" stroke="currentColor" strokeWidth="3.1" strokeLinecap="butt" strokeLinejoin="miter"><path d="M4 40V14l14 17 14-17v26M48 15h20M48 27.500h17M48 40h20M49.500 15v25M82 14l14.500 24L111 14M128 40V15h11.500a7.500 7.500 0 0 1 0 15.200H128m11 0L151 40M166 40l14-26 14 26M171 31.500h18" /><path d="M96.500 1c4.200 4.100 4.600 8.300 0 14-4.600-5.700-4.200-9.900 0-14z" fill="#B49A65" stroke="none" /></svg>;
+}
+const I: Record<string, React.ReactNode> = {
+  search: <><circle cx="11" cy="11" r="6.500" /><path d="m16 16 5 5" /></>, user: <><circle cx="12" cy="8" r="4" /><path d="M4 21c1-5 4.500-7 8-7s7 2 8 7" /></>, bag: <><path d="M5 8h14l1 13H4L5 8Z" /><path d="M9 10V7a3 3 0 0 1 6 0v3" /></>, menu: <path d="M3 7h18M3 12h18M3 17h18" />, x: <path d="m5 5 14 14M19 5 5 19" />, heart: <path d="M12 20S4 15 4 9a4.200 4.200 0 0 1 8-2 4.200 4.200 0 0 1 8 2c0 6-8 11-8 11Z" />, plus: <path d="M12 5v14M5 12h14" />, minus: <path d="M5 12h14" />, arrow: <path d="M4 12h16m-6-6 6 6-6 6" />, check: <path d="m4 12.500 5.500 5.500L20 7" />, chat: <path d="M4 5h16v11H9l-5 4V5Z" />, truck: <><path d="M2 6h12v11H2zM14 10h4l4 4v3h-8z" /><circle cx="7" cy="18" r="2" /><circle cx="17.500" cy="18" r="2" /></>, compare: <path d="M7 4v16M7 4 4 7m3-3 3 3M17 20V4m0 16-3-3m3 3 3-3" />, bell: <><path d="M6 16V11a6 6 0 0 1 12 0v5l1.500 2h-15L6 16Z" /><path d="M10 21h4" /></>, gift: <><rect x="4" y="10" width="16" height="10" /><path d="M3 7h18v3H3zM12 7v13M12 7c-5 0-5-5-2-5 2 0 2 5 2 5Zm0 0c5 0 5-5 2-5-2 0-2 5-2 5Z" /></>, filter: <path d="M3 6h18M6 12h12M10 18h4" />,
+  graded: <><path d="M3 19h18M3 19v-3m4.500 3v-2m4.500 2v-3m4.500 3v-2M21 19v-3" /><path d="M12 3c3.200 3 3.600 6.500 0 10.500C8.400 9.500 8.800 6 12 3Z" /></>, dated: <><rect x="4" y="5" width="16" height="15" /><path d="M4 10h16M8 3v4m8-4v4" /><path d="m9 15 2 2 4-4" /></>, tested: <><path d="M9 3h6M10 3v6L5 19a1.500 1.500 0 0 0 1.400 2h11.200A1.500 1.500 0 0 0 19 19L14 9V3" /><path d="M7.500 15h9" /></>, served: <><path d="M3 14c0-5 4-8 9-8s9 3 9 8M2 14h20M4 18h16M12 6V3.500" /></>,
+};
+export function Icon({ n, className = 'size-5', w = 1.6 }: { n: string; className?: string; w?: number }) { return <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={w} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{I[n]}</svg>; }
+export function Crumbs({ items }: { items: [string, string?][] }) {
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3100'; const all: [string, string?][] = [['Home', '/'], ...items];
+  return <><nav aria-label="Breadcrumb" className="text-sm text-grey"><ol className="flex flex-wrap items-center gap-x-2">{all.map(([l, h], i) => <li key={l} className="flex items-center gap-2">{i > 0 && <span aria-hidden>/</span>}{h && i < all.length - 1 ? <Link href={h} className="inline-flex min-h-11 items-center hover:text-ink hover:underline">{l}</Link> : <span aria-current="page" className="py-2 text-ink">{l}</span>}</li>)}</ol></nav>
+    <JsonLd data={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: all.map(([name, h], i) => ({ '@type': 'ListItem', position: i + 1, name, ...(h ? { item: site + h } : {}) })) }} /></>;
+}
+export const JsonLd = ({ data }: { data: object }) => <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, '\\u003c') }} />;
+/** Clearly marked editable placeholder for business facts that have not been supplied. */
+export const Placeholder = ({ value, label }: { value?: string | null; label: string }) => value ? <>{value}</> : <span className="ph">{label} to be added</span>;
+export function Help({ s, text, label = 'Ask us on WhatsApp', className = 'btn btn-s' }: { s: Settings; text: string; label?: string; className?: string }) {
+  const n = s.business.whatsapp.replace(/\D/g, '');
+  return n ? <a className={className} data-track="whatsapp_click" href={`https://wa.me/${n.length === 10 ? '91' + n : n}?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer"><Icon n="chat" />{label}</a> : <Link className={className} href={`/contact?topic=${encodeURIComponent(text.slice(0, 120))}`}><Icon n="chat" />{label.replace('on WhatsApp', 'a question').replace('WhatsApp us', 'Message us')}</Link>;
+}
+export function Field({ l, n, e, hint, children, className = '' }: { l: string; n: string; e?: string; hint?: string; children?: React.ReactNode; className?: string }) { return <div className={className}><label className="lab" htmlFor={n}>{l}</label>{children}{hint && !e && <p className="mt-1 text-sm text-grey">{hint}</p>}{e && <p className="err" id={`${n}-e`}>{e}</p>}</div>; }

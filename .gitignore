@@ -1,0 +1,13 @@
+node_modules
+.next
+.pgdata
+.pgpw
+.env.local
+.env
+uploads
+*.tsbuildinfo
+next-env.d.ts
+backups
+.next*
+.claude/settings.local.json
+.pgpw

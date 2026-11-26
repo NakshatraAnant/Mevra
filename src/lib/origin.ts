@@ -1,0 +1,1 @@
+export function sameOrigin(req: Request) { const o = req.headers.get('origin'); if (!o) return false; try { return new URL(o).host === (req.headers.get('x-forwarded-host') || req.headers.get('host')); } catch { return false; } }

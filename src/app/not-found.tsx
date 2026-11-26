@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function NotFound() { return <main className="wrap grid min-h-dvh place-content-center gap-4 py-20 text-center"><h1 className="h1">We could not find that page</h1><p className="text-grey">It may have moved, or the product may no longer be listed.</p><div className="flex justify-center gap-3"><Link href="/" className="btn btn-p">Go home</Link><Link href="/shop" className="btn btn-s">Shop</Link></div></main>; }

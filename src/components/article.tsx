@@ -1,0 +1,2 @@
+type B = { t: 'p' | 'h' | 'l' | 'note'; v: string | string[] };
+export function Blocks({ body }: { body: B[] }) { return <div className="space-y-5 text-[1.0938rem] leading-[1.75]">{body.map((b, i) => b.t === 'h' ? <h2 key={i} className="h3 pt-4">{b.v}</h2> : b.t === 'l' ? <ul key={i} className="list-disc space-y-2 pl-6">{(b.v as string[]).map(x => <li key={x}>{x}</li>)}</ul> : b.t === 'note' ? <p key={i} className="note">{b.v}</p> : <p key={i}>{b.v}</p>)}</div>; }

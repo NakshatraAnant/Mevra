@@ -1,0 +1,1 @@
+import { ensureDb } from './pg.mjs'; const stop = await ensureDb(); console.log('PostgreSQL ready. Ctrl+C to stop.'); setInterval(() => { }, 1e6); process.on('SIGINT', async () => { await stop(); process.exit(); });

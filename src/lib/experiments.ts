@@ -1,0 +1,5 @@
+import 'server-only'; import { cache } from 'react'; import { cookies } from 'next/headers'; import { createHash } from 'node:crypto'; import { live } from './db';
+export type Exp = { key: string; variants: { key: string; weight: number; value: string }[] };
+const running = cache(async () => [...await live()<Exp[]>`SELECT key, variants FROM experiments WHERE status='running'`]);
+/** Sticky, unbiased assignment by hashed visitor id. Off experiments always return the control value. */
+export async function variant(key: string, control: string): Promise<{ value: string; exposure: { key: string; variant: string } | null }> { const e = (await running()).find(x => x.key === key); const vid = (await cookies()).get('mv_vid')?.value; if (!e || !vid) return { value: control, exposure: null }; const total = e.variants.reduce((a, v) => a + v.weight, 0) || 1; let n = parseInt(createHash('sha256').update(`${key}:${vid}`).digest('hex').slice(0, 8), 16) % total; for (const v of e.variants) { if ((n -= v.weight) < 0) return { value: v.value, exposure: { key, variant: v.key } }; } return { value: control, exposure: null }; }

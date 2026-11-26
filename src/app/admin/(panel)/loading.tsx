@@ -1,0 +1,1 @@
+export default function L() { return <div role="status" aria-label="Loading" className="animate-pulse"><div className="mb-6 h-8 w-64 bg-line" /><div className="grid grid-cols-2 gap-3 md:grid-cols-4">{Array.from({ length: 8 }, (_, i) => <div key={i} className="h-24 bg-cream" />)}</div><div className="mt-4 h-72 bg-cream" /></div>; }

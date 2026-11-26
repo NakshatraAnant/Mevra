@@ -1,0 +1,1 @@
+export default function Page() { return <div className="py-16 text-center"><h1 className="h2">You do not have access to this area</h1><p className="mt-2 text-grey">Ask the account owner to change your role.</p></div>; }

@@ -1,0 +1,1 @@
+export const GIFT_STEPS: [string, string][] = [['Tell us quantity and date', 'Share the occasion, number of boxes and when you need them.'], ['Review a sample', 'See and taste a sample box before you commit.'], ['Approve sleeve and card', 'We share artwork. Nothing prints until you say yes.'], ['We pack and deliver', 'Packed to your approved sample and sent to your addresses.']];
