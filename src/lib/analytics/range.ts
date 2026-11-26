@@ -3,7 +3,7 @@ export type SP = Record<string, string | string[] | undefined>;
 export type Filters = { product: string; category: string; source: string; status: string; segment: string };
 export type Range = { preset: string; from: string; to: string; cmp: 'prev' | 'year' | 'none'; cfrom: string; cto: string; days: number; bucket: 'day' | 'week' | 'month'; f: Filters };
 export const PRESETS: [string, string][] = [['today', 'Today'], ['7d', '7 days'], ['30d', '30 days'], ['90d', '90 days'], ['mtd', 'Month to date'], ['qtd', 'Quarter to date'], ['ytd', 'Year to date'], ['12m', '12 months'], ['custom', 'Custom']];
-export async function adminDb(): Promise<{ sql: DB; isDemo: boolean }> { const d = (await cookies()).get('mv_scope')?.value === 'demo' && can(await currentAdmin(), 'any'); return { sql: d ? demo() : live(), isDemo: d }; }
+export async function adminDb(): Promise<{ sql: DB; isDemo: boolean }> { const d = process.env.SHOWCASE === '1' || ((await cookies()).get('mv_scope')?.value === 'demo' && can(await currentAdmin(), 'any')); return { sql: d ? demo() : live(), isDemo: d }; }
 const iso = (d: Date) => d.toISOString().slice(0, 10); export const addDays = (s: string, n: number) => iso(new Date(Date.parse(s + 'T00:00:00Z') + n * 864e5)); export const todayIST = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
 const ok = (s: unknown): s is string => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s)); const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || '';
 export function parseRange(sp: SP): Range {

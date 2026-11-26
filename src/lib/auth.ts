@@ -33,7 +33,10 @@ export const currentCustomer = cache(async (): Promise<Customer | null> => {
 });
 export type Role = 'owner' | 'manager' | 'support' | 'analyst';
 export type Admin = { id: string; email: string; name: string; role: Role };
+/** SHOWCASE=1: a separate, read-only demonstration instance. Visitors see the admin as its owner without signing in, and every admin change is refused. */
+export const SHOWCASE = process.env.SHOWCASE === '1';
 export const currentAdmin = cache(async (): Promise<Admin | null> => {
+  if (SHOWCASE) { const [o] = await live()<Admin[]>`SELECT id, email, 'Showcase visitor' AS name, role FROM admin_users WHERE role='owner' AND active ORDER BY created_at LIMIT 1`; return o || null; }
   const t = (await cookies()).get('mv_admin')?.value; if (!t) return null;
   const [r] = await live()<Admin[]>`SELECT a.id, a.email, a.name, a.role FROM sessions s JOIN admin_users a ON a.id = s.subject_id WHERE s.token_hash = ${sha(t)} AND s.kind = 'admin' AND s.expires_at > now() AND a.active`;
   return r || null;
@@ -46,7 +49,7 @@ const CAN: Record<string, Role[]> = {
 export type Cap = keyof typeof CAN;
 export const can = (a: Admin | null, cap: string) => !!a && (CAN[cap] || []).includes(a.role);
 export async function requireAdmin(cap = 'any'): Promise<Admin> {
-  const a = await currentAdmin(); if (!a) redirect('/admin/login'); if (!can(a, cap)) redirect('/admin/denied'); return a;
+  if (SHOWCASE && (await headers()).get('next-action')) throw new Error('This is a read-only showcase. Changes are switched off.'); const a = await currentAdmin(); if (!a) redirect('/admin/login'); if (!can(a, cap)) redirect('/admin/denied'); return a;
 }
 export async function clientIp() { const h = await headers(); return (h.get('x-forwarded-for')?.split(',')[0] || 'local').trim(); }
 /** Fixed-window limiter in Postgres. Returns true when the call is allowed. */
