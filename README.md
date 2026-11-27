@@ -29,7 +29,7 @@ Both commands start a bundled local PostgreSQL (data in .pgdata, port 5434), app
 
 - src/lib: also loyalty (append-only ledger), custom (mix and gift quotes), challenges, recommend, experiments, integrations, grades
 - src/three: procedural ingredients and scenes; tools/render/bake.mjs writes public/models
-- tests/e2e/v2.mjs: 2.0 coverage. Build with NEXT_PUBLIC_SITE_URL=http://localhost:3101 to test a separate NEXT_DIST
+- tests/e2e/v2.mjs: 2.0 coverage. Build with NEXT_PUBLIC_SITE_URL=http://localhost:3109 to test a separate NEXT_DIST
 - docs/INTEGRATIONS.md: adapter setup
 
 ## Data rules
