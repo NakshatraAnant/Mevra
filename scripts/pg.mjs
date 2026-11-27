@@ -6,15 +6,17 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 /** Starts the bundled local PostgreSQL through pg_ctl (own log file, survives a crashed parent) unless it already runs or DATABASE_URL is external. */
 export async function ensureDb() {
   if (env.EMBEDDED_POSTGRES !== '1') return async () => { };
-  const u = new URL(env.DATABASE_URL), port = +u.port, dir = path.join(ROOT, '.pgdata'); if (await open(port)) return async () => { };
-  const { default: postgres } = await import('postgres');
+  const u = new URL(env.DATABASE_URL), port = +u.port, dir = path.join(ROOT, '.pgdata'); const { default: postgres } = await import('postgres');
+  // After an unclean shutdown the server replays its log first and refuses connections meanwhile, so wait until it accepts queries.
+  const ready = async () => { const c = postgres(env.DATABASE_URL.replace(/\/[^/]*$/, '/postgres'), { max: 1, onnotice: () => { }, connect_timeout: 5 }); for (let i = 0; i < 240; i++) { try { await c`SELECT 1`; await c.end(); return; } catch (e) { if (!['57P03', 'ECONNREFUSED', 'ECONNRESET', 'CONNECT_TIMEOUT'].includes(e.code)) { await c.end({ timeout: 1 }); throw e; } await sleep(500); } } await c.end({ timeout: 1 }); throw new Error('PostgreSQL did not become ready within two minutes. See .pgdata/server.log'); };
+  if (await open(port)) { await ready(); return async () => { }; }
   if (!fs.existsSync(path.join(dir, 'PG_VERSION'))) {
     const pw = path.join(ROOT, '.pgpw'); fs.writeFileSync(pw, u.password + '\n');
     const r = spawnSync(bin('initdb'), [`--pgdata=${dir}`, `--username=${u.username}`, `--pwfile=${pw}`, '--auth=password', '--encoding=UTF8', '--locale=C'], { encoding: 'utf8' }); fs.rmSync(pw); if (r.status !== 0) throw new Error('initdb failed: ' + r.stderr);
   }
   // detached with ignored stdio, so the server never blocks on a dead parent's pipe
   spawn(bin('pg_ctl'), ['start', '-D', dir, '-l', path.join(dir, 'server.log'), '-o', `-p ${port} -c listen_addresses=127.0.0.1`], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
-  for (let i = 0; i < 120 && !(await open(port)); i++) await sleep(250);
+  for (let i = 0; i < 120 && !(await open(port)); i++) await sleep(250); await ready();
   const admin = postgres(env.DATABASE_URL.replace(/\/[^/]*$/, '/postgres'), { max: 1, onnotice: () => { } });
   for (let i = 0; ; i++) { try { if (!(await admin`SELECT 1 FROM pg_database WHERE datname = ${u.pathname.slice(1)}`).length) await admin.unsafe(`CREATE DATABASE ${u.pathname.slice(1)}`); break; } catch (e) { if (i > 20) throw e; await sleep(500); } }
   await admin.end();
